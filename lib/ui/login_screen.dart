@@ -31,6 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
       await settings.setToken(token);
+      await settings.saveAccount(
+        _emailController.text,
+        _passwordController.text,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -134,9 +138,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ).animate().fadeIn(delay: 400.ms),
                   const SizedBox(height: 48),
-                  if (_userCode == null)
-                    ..._buildEmailFields(colorScheme)
-                  else
+                  if (_userCode == null) ...[
+                    _buildSavedAccounts(context, colorScheme),
+                    const SizedBox(height: 24),
+                    ..._buildEmailFields(colorScheme),
+                  ] else
                     ..._buildDeviceFlow(colorScheme),
                 ],
               ),
@@ -247,5 +253,111 @@ class _LoginScreenState extends State<LoginScreen> {
         child: const Text('Back to Login'),
       ),
     ];
+  }
+
+  Widget _buildSavedAccounts(BuildContext context, ColorScheme colorScheme) {
+    // We need to listen to SettingsService to update the list if an account is removed
+    final settings = context.watch<SettingsService>();
+    final accounts = settings.savedAccounts;
+
+    if (accounts.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Saved Accounts',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
+        ).animate().fadeIn(),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 100, // Fixed height for horizontal list
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: accounts.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final account = accounts[index];
+              final email = account['username'] ?? '';
+              final password = account['password'] ?? '';
+
+              // Simple avatar logic: first letter
+              final initial = email.isNotEmpty ? email[0].toUpperCase() : '?';
+
+              return Stack(
+                children: [
+                  Material(
+                    color: colorScheme.surfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        _emailController.text = email;
+                        _passwordController.text = password;
+                        _login();
+                      },
+                      child: Container(
+                        width: 140,
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundColor: colorScheme.primaryContainer,
+                              child: Text(
+                                initial,
+                                style: TextStyle(
+                                  color: colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => settings.removeAccount(email),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.errorContainer,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: colorScheme.surface,
+                            width: 2,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.close,
+                          size: 12,
+                          color: colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ).animate().fadeIn(delay: (100 * index).ms).slideX();
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

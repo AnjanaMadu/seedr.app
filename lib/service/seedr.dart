@@ -52,7 +52,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Login',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -81,7 +81,7 @@ class Seedr {
     var url = 'https://www.seedr.cc/oauth_test/device.php';
     var response = await http.get(Uri.parse(url));
     _log(
-      'GET',
+      'GET Device Code',
       url,
       statusCode: response.statusCode,
       responseBody: response.body,
@@ -108,7 +108,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Get Token',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -136,7 +136,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Add Magnet',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -179,7 +179,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Fetch File',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -210,7 +210,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Delete File',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -243,7 +243,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Delete Folder',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -276,7 +276,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Delete Torrent',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),
@@ -309,7 +309,7 @@ class Seedr {
     var responseData = await response.stream.bytesToString();
 
     _log(
-      'POST',
+      'POST Create Archive',
       url,
       statusCode: response.statusCode,
       requestBody: fields.toString(),

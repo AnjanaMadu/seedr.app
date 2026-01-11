@@ -14,6 +14,7 @@ A Flutter application for streaming and downloading torrents efficiently across 
 ## ✨ Features
 
 - 🔐 User authentication and login
+- 👥 Multi-account support with saved credentials
 - 🧲 Add and manage magnet links
 - 📊 Real-time torrent downloads and streaming
 - 📝 Comprehensive logging system

@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchContents();
-    _startAutoRefresh();
+    // Auto refresh handled in didChangeDependencies
   }
 
   @override
@@ -36,13 +36,26 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _startAutoRefresh() {
-    _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!_isLoading) {
-        _fetchContents(silent: true);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final settings = context.watch<SettingsService>();
+    _updateAutoRefresh(settings.autoRefresh);
+  }
+
+  void _updateAutoRefresh(bool isEnabled) {
+    if (isEnabled) {
+      if (_refreshTimer == null || !_refreshTimer!.isActive) {
+        _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+          if (!_isLoading) {
+            _fetchContents(silent: true);
+          }
+        });
       }
-    });
+    } else {
+      _refreshTimer?.cancel();
+      _refreshTimer = null;
+    }
   }
 
   Future<void> _fetchContents({bool silent = false}) async {
@@ -125,7 +138,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   ).push(MaterialPageRoute(builder: (_) => const LogScreen())),
                 ),
                 PopupMenuButton(
-                  itemBuilder: (context) => [
+                  itemBuilder: (context) => <PopupMenuEntry<dynamic>>[
+                    PopupMenuItem(
+                      onTap: () {
+                        // Toggle auto refresh
+                        settings.setAutoRefresh(!settings.autoRefresh);
+                      },
+                      child: Row(
+                        children: [
+                          Icon(
+                            settings.autoRefresh
+                                ? Icons.check_box_outlined
+                                : Icons.check_box_outline_blank,
+                            size: 20,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Auto Refresh'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
                     PopupMenuItem(
                       onTap: () => settings.logout(),
                       child: const Row(
@@ -486,12 +519,11 @@ class _HomeScreenState extends State<HomeScreen> {
         folder.id.toString(),
       );
       if (details.result) {
+        await Clipboard.setData(ClipboardData(text: details.archiveUrl));
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Archive created! Copy link from logs: ${details.archiveUrl.substring(0, 30)}...',
-              ),
+            const SnackBar(
+              content: Text('Archive created! Link copied to clipboard.'),
             ),
           );
         }
