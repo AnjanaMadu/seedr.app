@@ -25,17 +25,17 @@ A Flutter application for streaming and downloading torrents efficiently across 
 
 ### Prerequisites
 
-- Flutter SDK 3.24.0 or higher
+- Flutter SDK 3.38.1 or higher
 - Android SDK (for Android development)
 - Xcode (for iOS development)
-- Java 17+
+- Java 21+
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/seedr.git
-   cd seedr
+   git clone https://github.com/anjanamadu/seedr.app.git
+   cd seedr.app
    ```
 
 2. **Get dependencies**
