@@ -34,8 +34,8 @@ A Flutter application for streaming and downloading torrents efficiently across 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/seedr.git
-   cd seedr
+   git clone https://github.com/anjanamadu/seedr.app.git
+   cd seedr.app
    ```
 
 2. **Get dependencies**
