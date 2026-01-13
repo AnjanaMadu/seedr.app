@@ -9,6 +9,7 @@ import '../service/settings_service.dart';
 import '../models/seedr_models.dart';
 import 'log_screen.dart';
 import 'add_magnet_dialog.dart';
+import 'torrent_search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -130,6 +131,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           : ThemeMode.dark,
                     );
                   },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search_rounded),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const TorrentSearchScreen(),
+                    ),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.history_rounded),

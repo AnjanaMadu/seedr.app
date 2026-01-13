@@ -20,8 +20,14 @@ void main() async {
         ProxyProvider2<LoggingService, SettingsService, Seedr>(
           update: (_, logger, settings, __) {
             final seedr = Seedr(logger: logger);
+            seedr.onTokenRefresh = (access, refresh) {
+              settings.setTokens(access, refresh);
+            };
             if (settings.token != null) {
               seedr.token = settings.token;
+            }
+            if (settings.refreshToken != null) {
+              seedr.rft = settings.refreshToken;
             }
             return seedr;
           },

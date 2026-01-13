@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text,
         _passwordController.text,
       );
-      await settings.setToken(token);
+      await settings.setTokens(token, seedr.rft);
       await settings.saveAccount(
         _emailController.text,
         _passwordController.text,
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final seedr = context.read<Seedr>();
       final settings = context.read<SettingsService>();
       final token = await seedr.getToken(_deviceCode!);
-      await settings.setToken(token);
+      await settings.setTokens(token, seedr.rft);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
