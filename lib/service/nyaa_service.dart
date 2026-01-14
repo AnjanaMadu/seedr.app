@@ -5,9 +5,9 @@ import '../models/torrent_result.dart';
 class NyaaService {
   static const String baseUrl = 'https://nyaa.si/';
 
-  Future<List<TorrentResult>> search(String query) async {
+  Future<List<TorrentResult>> search(String query, {int page = 1}) async {
     final encodedQuery = Uri.encodeComponent(query);
-    final url = '$baseUrl?f=0&c=0_0&q=$encodedQuery';
+    final url = '$baseUrl?f=0&c=0_0&q=$encodedQuery&p=$page';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) {

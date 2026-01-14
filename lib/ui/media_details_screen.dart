@@ -29,7 +29,10 @@ class _MediaDetailsScreenState extends State<MediaDetailsScreen>
   List<TorrentResult> _torrents = [];
   bool _isLoadingDetails = true;
   bool _isLoadingTorrents = false;
+  bool _isLoadingMore = false;
   String? _torrentError;
+  int _currentPage = 1;
+  bool _hasMore = true;
 
   @override
   void initState() {
@@ -66,15 +69,21 @@ class _MediaDetailsScreenState extends State<MediaDetailsScreen>
     }
   }
 
-  Future<void> _loadTorrents() async {
-    setState(() {
-      _isLoadingTorrents = true;
-      _torrentError = null;
-    });
+  Future<void> _loadTorrents({bool loadMore = false}) async {
+    if (loadMore) {
+      if (_isLoadingMore || !_hasMore) return;
+      setState(() => _isLoadingMore = true);
+    } else {
+      setState(() {
+        _isLoadingTorrents = true;
+        _torrentError = null;
+        _currentPage = 1;
+        _hasMore = true;
+        _torrents = [];
+      });
+    }
 
     try {
-      // FIX: Use English name/title for Anime, as Nyaa mostly indexes English or Romaji.
-      // Use original name (Hangul) for KDrama, or fallback to English if needed.
       final isAnime = widget.media.originCountry?.contains('JP') ?? false;
       final isKDrama = widget.media.originCountry?.contains('KR') ?? false;
 
@@ -83,8 +92,6 @@ class _MediaDetailsScreenState extends State<MediaDetailsScreen>
         query =
             widget.media.name ?? widget.media.title ?? widget.media.displayName;
       } else if (isKDrama) {
-        // TorrentSome usually handles Hangul well, or the service converts it.
-        // But let's try original name first if available.
         query = widget.media.displayOriginalName;
       } else {
         query = widget.media.displayName;
@@ -92,25 +99,37 @@ class _MediaDetailsScreenState extends State<MediaDetailsScreen>
 
       List<TorrentResult> results = [];
       if (isAnime) {
-        results = await _nyaaService.search(query);
+        results = await _nyaaService.search(query, page: _currentPage);
       } else if (isKDrama) {
-        results = await _torrentSomeService.search(query);
+        results = await _torrentSomeService.search(query, page: _currentPage);
       } else {
-        // Fallback or potentially ask user/try both
-        results = await _nyaaService.search(query);
+        results = await _nyaaService.search(query, page: _currentPage);
       }
 
       if (mounted) {
         setState(() {
-          _torrents = results;
-          _isLoadingTorrents = false;
-          if (results.isEmpty) _torrentError = 'No torrents found for "$query"';
+          if (loadMore) {
+            _torrents.addAll(results);
+            _isLoadingMore = false;
+          } else {
+            _torrents = results;
+            _isLoadingTorrents = false;
+            if (results.isEmpty)
+              _torrentError = 'No torrents found for "$query"';
+          }
+
+          if (results.isEmpty) {
+            _hasMore = false;
+          } else {
+            _currentPage++;
+          }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingTorrents = false;
+          _isLoadingMore = false;
           _torrentError = 'Failed to fetch torrents: $e';
         });
       }
@@ -619,8 +638,22 @@ class _MediaDetailsScreenState extends State<MediaDetailsScreen>
                           16,
                           80 + bottomPadding,
                         ),
-                        itemCount: _torrents.length,
+                        itemCount: _torrents.length + (_hasMore ? 1 : 0),
                         itemBuilder: (context, index) {
+                          if (index == _torrents.length) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: _isLoadingMore
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : FilledButton.tonal(
+                                      onPressed: () =>
+                                          _loadTorrents(loadMore: true),
+                                      child: const Text('Load More'),
+                                    ),
+                            );
+                          }
                           final torrent = _torrents[index];
                           return _buildTorrentCard(torrent, colorScheme, index);
                         },

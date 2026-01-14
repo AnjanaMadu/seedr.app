@@ -27,7 +27,7 @@ class TorrentSomeService {
     return null;
   }
 
-  Future<List<TorrentResult>> search(String query) async {
+  Future<List<TorrentResult>> search(String query, {int page = 1}) async {
     // 1. Get original title from TMDB
     final originalTitle = await getOriginalTitle(query);
     if (originalTitle == null) return [];
@@ -35,7 +35,7 @@ class TorrentSomeService {
     // 2. Search on TorrentSome
     final encodedName = Uri.encodeComponent(originalTitle);
     final searchUrl =
-        'https://torrentsome230.com/search/index?keywords=$encodedName&search_type=0';
+        'https://torrentsome230.com/search/index?keywords=$encodedName&search_type=0&page=$page';
 
     final response = await http.get(Uri.parse(searchUrl), headers: headers);
     if (response.statusCode != 200) return [];
