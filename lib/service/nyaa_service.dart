@@ -1,26 +1,11 @@
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
-
-class NyaaResult {
-  final String title;
-  final String cleanedTitle;
-  final String size;
-  final String seeders;
-  final String magnet;
-
-  NyaaResult({
-    required this.title,
-    required this.cleanedTitle,
-    required this.size,
-    required this.seeders,
-    required this.magnet,
-  });
-}
+import '../models/torrent_result.dart';
 
 class NyaaService {
   static const String baseUrl = 'https://nyaa.si/';
 
-  Future<List<NyaaResult>> search(String query) async {
+  Future<List<TorrentResult>> search(String query) async {
     final encodedQuery = Uri.encodeComponent(query);
     final url = '$baseUrl?f=0&c=0_0&q=$encodedQuery';
 
@@ -52,15 +37,16 @@ class NyaaService {
           // Extract Seeders
           final seeders = tds[5].text.trim();
 
-          return NyaaResult(
+          return TorrentResult(
             title: originalTitle,
             cleanedTitle: _cleanTitle(originalTitle),
             size: size,
             seeders: seeders,
             magnet: magnet,
+            engine: 'nyaa',
           );
         })
-        .whereType<NyaaResult>()
+        .whereType<TorrentResult>()
         .toList();
   }
 
